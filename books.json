@@ -1,0 +1,44 @@
+[
+    {
+        "id": 1,
+        "title": "El Quijote",
+        "author": "Miguel de Cervantes",
+        "editorial": "Editorial Planeta",
+        "price": 24.99
+    },
+    {
+        "id": 2,
+        "title": "Cien Años de Soledad",
+        "author": "Gabriel García Márquez",
+        "editorial": "Editorial Sudamericana",
+        "price": 19.99
+    },
+    {
+        "id": 3,
+        "title": "Don Juan Tenorio",
+        "author": "José Zorrilla",
+        "editorial": "Editorial Espasa",
+        "price": 15.99
+    },
+    {
+        "id": 4,
+        "title": "La Casa de Bernarda Alba",
+        "author": "Federico García Lorca",
+        "editorial": "Editorial Cátedra",
+        "price": 12.99
+    },
+    {
+        "id": 5,
+        "title": "Pedro Páramo",
+        "author": "Juan Rulfo",
+        "editorial": "Editorial RM",
+        "price": 18.99
+    },
+    {
+        "id": 6,
+        "title": "Rayuela",
+        "author": "Julio Cortázar",
+        "editorial": "Editorial Alfaguara",
+        "price": 22.99
+    }
+]
