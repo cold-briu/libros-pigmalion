@@ -1,6 +1,16 @@
 // Cart object to store selected books
 let cart = {};
 
+// Pagination variables
+let allBooks = [];
+let currentPage = 0;
+const booksPerPage = 5;
+
+// Snow effect variables
+let snowContainer;
+let snowflakes = [];
+const snowCharacters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+
 // DOM elements
 let booksGrid;
 let cartCounter;
@@ -10,6 +20,7 @@ let cartEmpty;
 let cartTotal;
 let checkoutBtn;
 let closeModal;
+let loadMoreBtn;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function () {
@@ -19,6 +30,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeCartCounter();
     initializeModal();
     initializeCTAButton();
+    initializeSnowEffect();
 });
 
 // Initialize DOM elements
@@ -31,37 +43,69 @@ function initializeElements() {
     cartTotal = document.getElementById('cartTotal');
     checkoutBtn = document.getElementById('checkoutBtn');
     closeModal = document.getElementById('closeModal');
+    loadMoreBtn = document.getElementById('loadMoreBtn');
+    snowContainer = document.getElementById('snowContainer');
 }
 
 // Load books from JSON and render them
 async function loadBooks() {
     try {
-        const response = await fetch('books.json');
-        const books = await response.json();
-        renderBooks(books);
+        const response = await fetch('https://script.google.com/macros/s/AKfycbzSuRLZkqqvlXPNxy9NlorqvXinmR4WoU7PFbqwrc-Te0YMJltl-Kcnnt2HfNUAAeUvig/exec');
+        const booksData = await response.json();
+
+        // Transform the data to match our expected format
+        const books = booksData.map((book, index) => ({
+            id: index + 1, // Generate sequential IDs
+            title: book.TITULO,
+            author: book.AUTOR,
+            editorial: book.EDITORIAL,
+            price: book.PRECIO
+        }));
+
+        allBooks = books;
+        renderBooks();
     } catch (error) {
         console.error('Error loading books:', error);
         // Fallback to static books if JSON fails
         const fallbackBooks = [
-            { id: 1, title: "El Quijote", author: "Miguel de Cervantes", editorial: "Editorial Planeta", price: 24.99 },
-            { id: 2, title: "Cien Años de Soledad", author: "Gabriel García Márquez", editorial: "Editorial Sudamericana", price: 19.99 },
-            { id: 3, title: "Don Juan Tenorio", author: "José Zorrilla", editorial: "Editorial Espasa", price: 15.99 },
-            { id: 4, title: "La Casa de Bernarda Alba", author: "Federico García Lorca", editorial: "Editorial Cátedra", price: 12.99 },
-            { id: 5, title: "Pedro Páramo", author: "Juan Rulfo", editorial: "Editorial RM", price: 18.99 },
-            { id: 6, title: "Rayuela", author: "Julio Cortázar", editorial: "Editorial Alfaguara", price: 22.99 }
+            { id: 1, title: "El Quijote", author: "Miguel de Cervantes", editorial: "Editorial Planeta", price: 24999 },
+            { id: 2, title: "Cien Años de Soledad", author: "Gabriel García Márquez", editorial: "Editorial Sudamericana", price: 19999 },
+            { id: 3, title: "Don Juan Tenorio", author: "José Zorrilla", editorial: "Editorial Espasa", price: 15999 },
+            { id: 4, title: "La Casa de Bernarda Alba", author: "Federico García Lorca", editorial: "Editorial Cátedra", price: 12999 },
+            { id: 5, title: "Pedro Páramo", author: "Juan Rulfo", editorial: "Editorial RM", price: 18999 },
+            { id: 6, title: "Rayuela", author: "Julio Cortázar", editorial: "Editorial Alfaguara", price: 22999 }
         ];
-        renderBooks(fallbackBooks);
+        allBooks = fallbackBooks;
+        renderBooks();
     }
 }
 
-// Render books in the grid
-function renderBooks(books) {
-    booksGrid.innerHTML = '';
+// Render books in the grid with pagination
+function renderBooks() {
+    // Only clear the grid on initial load (currentPage === 0)
+    if (currentPage === 0) {
+        booksGrid.innerHTML = '';
+    }
 
-    books.forEach(book => {
+    // Calculate which books to show
+    const startIndex = currentPage * booksPerPage;
+    const endIndex = startIndex + booksPerPage;
+    const booksToShow = allBooks.slice(startIndex, endIndex);
+
+    // Append the books for current page (don't clear previous ones)
+    booksToShow.forEach(book => {
         const bookCard = createBookCard(book);
         booksGrid.appendChild(bookCard);
     });
+
+    // Show/hide load more button
+    if (loadMoreBtn) {
+        if (endIndex >= allBooks.length) {
+            loadMoreBtn.style.display = 'none';
+        } else {
+            loadMoreBtn.style.display = 'block';
+        }
+    }
 }
 
 // Create a book card element
@@ -185,6 +229,11 @@ function initializeModal() {
 
     // Handle checkout button
     checkoutBtn.addEventListener('click', handleCheckout);
+
+    // Handle load more button
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', loadMore);
+    }
 }
 
 // Open modal
@@ -303,18 +352,97 @@ function createWhatsAppLink(message) {
     return `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
 }
 
-// Initialize CTA button functionality
+// Initialize CTA button
 function initializeCTAButton() {
     const ctaButton = document.querySelector('.cta-button');
     if (ctaButton) {
         ctaButton.addEventListener('click', () => {
+            // Scroll to gallery section
             const gallerySection = document.querySelector('.gallery');
             if (gallerySection) {
-                gallerySection.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+                gallerySection.scrollIntoView({ behavior: 'smooth' });
             }
         });
     }
+}
+
+// Initialize snow effect
+function initializeSnowEffect() {
+    if (!snowContainer) return;
+
+    // Create initial snowflakes
+    for (let i = 0; i < 15; i++) {
+        setTimeout(() => {
+            createSnowflake();
+        }, i * 200);
+    }
+
+    // Continue creating snowflakes periodically
+    setInterval(() => {
+        if (snowflakes.length < 20) {
+            createSnowflake();
+        }
+    }, 1000);
+}
+
+// Create a single snowflake
+function createSnowflake() {
+    if (!snowContainer) return;
+
+    const snowflake = document.createElement('div');
+    snowflake.className = 'snowflake';
+
+    // Random character from the array
+    const randomChar = snowCharacters[Math.floor(Math.random() * snowCharacters.length)];
+    snowflake.textContent = randomChar;
+
+    // Random position and animation duration
+    const startX = Math.random() * window.innerWidth;
+    const animationDuration = 8 + Math.random() * 12; // 8-20 seconds
+    const startDelay = Math.random() * 2; // 0-2 seconds delay
+
+    snowflake.style.left = startX + 'px';
+    snowflake.style.animationDuration = animationDuration + 's';
+    snowflake.style.animationDelay = startDelay + 's';
+
+    // Add to container
+    snowContainer.appendChild(snowflake);
+    snowflakes.push(snowflake);
+
+    // Remove snowflake after animation completes
+    setTimeout(() => {
+        if (snowflake.parentNode) {
+            snowflake.parentNode.removeChild(snowflake);
+            const index = snowflakes.indexOf(snowflake);
+            if (index > -1) {
+                snowflakes.splice(index, 1);
+            }
+        }
+    }, (animationDuration + startDelay) * 1000);
+}
+
+// Load more books
+function loadMore() {
+    // Store current scroll position
+    const currentScrollPosition = window.pageYOffset;
+
+    currentPage++;
+    renderBooks();
+
+    // Smooth scroll to the last book rendered while maintaining scroll position
+    setTimeout(() => {
+        const books = booksGrid.querySelectorAll('.book-card');
+        if (books.length > 0) {
+            const lastBook = books[books.length - 1];
+            const offsetTop = lastBook.offsetTop - 100; // 100px offset from top
+
+            // Only scroll if the new content is below current position
+            if (offsetTop > currentScrollPosition) {
+                window.scrollTo({
+                    top: offsetTop,
+                    behavior: 'smooth'
+                });
+            }
+        }
+    }, 100); // Small delay to ensure DOM is updated
 } 
